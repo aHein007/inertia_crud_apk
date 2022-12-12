@@ -6,6 +6,10 @@
   <div class="container alert alert-success mt-5" style="max-width:1000px;" v-if="$page.props.flash.create" >
       {{ $page.props.flash.create }}
   </div>
+
+  <div class="container alert alert-success mt-5" style="max-width:1000px;" v-if="$page.props.flash.update" >
+      {{ $page.props.flash.update }}
+  </div>
 <div class="container mt-5 mx-3"  >
 
   <h1 class=" text-3xl">User List</h1>
@@ -28,7 +32,7 @@
       <td>{{ user.created_at }}</td>
       <td>
 
-        <Link  class="btn btn-success me-1 btn-sm">Edit</Link>
+        <Link :href="route('user#edit',user.id)"  class="btn btn-success me-1 btn-sm">Edit</Link>
         <Link @click="destroy(user.id)" class="btn btn-danger btn-sm">Delete</Link>
 
       </td>

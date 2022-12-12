@@ -38,24 +38,18 @@ class UserIndexController extends Controller
      */
     public function store(Request $request)
     {
+
+
         $creatData =$this->data($request);
         UserIndex::create($creatData);
 
         return redirect()->route('user#index')
                         ->with('user_create','User data is successfully created!');
 
-    //    $data =UserIndex::create($creatData);
+
     }
 
-    private function data($request){
-        $dataUser= [
-            'name' =>$request->name,
-            'email' =>$request->email,
-            'password' =>$request->password
-        ];
 
-        return $dataUser;
-    }
 
     /**
      * Display the specified resource.
@@ -74,9 +68,11 @@ class UserIndexController extends Controller
      * @param  \App\Models\UserIndex  $userIndex
      * @return \Illuminate\Http\Response
      */
-    public function edit(UserIndex $userIndex)
+    public function edit(UserIndex $userIndex,$id)
     {
-        //
+        return Inertia::render("User/Edit",[
+            'data_user' =>UserIndex::where('id',$id)->first(),
+        ]);
     }
 
     /**
@@ -86,9 +82,17 @@ class UserIndexController extends Controller
      * @param  \App\Models\UserIndex  $userIndex
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserIndex $userIndex)
+    public function update(Request $request, UserIndex $userIndex,$id)
     {
-        //
+
+      if($request->password){
+        $data=$request->all();
+        $userIndex->where("id",$id)
+                  ->update($data);
+      }
+
+       return redirect()->route('user#index')
+                        ->with("user_update",'User data have been Update!');
     }
 
     /**
@@ -104,5 +108,22 @@ class UserIndexController extends Controller
        $id->delete();
        return redirect()->route('user#index')->with("user_delete",'User data have been delete!');
 
+    }
+
+    private function data($request){
+
+        $request->validate([
+            'name'=>['required'|"min:5"|"max:100"],
+            'email' =>['required'|"email"],
+            'password'=>['required'|"min:6"|"max:20"]
+        ]);
+
+        $dataUser= [
+            'name' =>$request->name,
+            'email' =>$request->email,
+            'password' =>$request->password
+        ];
+
+        return $dataUser;
     }
 }

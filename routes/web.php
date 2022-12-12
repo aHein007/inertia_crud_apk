@@ -21,10 +21,17 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get("/user",[UserIndexController::class,'index'])->name('user#index');
-Route::get("/create_user",[UserIndexController::class,'create'])->name('user#create_user');
-Route::post("/create_userData",[UserIndexController::class,'store']);
-Route::delete("/delete/{id}",[UserIndexController::class,'destroy']);
+
+Route::controller(UserIndexController::class)->group(function(){
+    Route::get("/user",'index')->name('user#index');
+    Route::get("/create_user",'create')->name('user#create_user');
+    Route::post("/create_userData",'store');
+    Route::get("/edit_user/{id}","edit")->name("user#edit");
+    Route::delete("/delete/{id}",'destroy');
+    Route::put("/edit_data/{id}",'update');
+});
+
+
 
 
 Route::middleware('auth')->group(function () {
