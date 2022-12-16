@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Inertia\Inertia;
 use App\Models\UserIndex;
 use Illuminate\Http\Request;
+use App\Http\Requests\UserstoreRequest;
+use App\Http\Requests\UserupdateRequest;
+
+
+
 
 class UserIndexController extends Controller
 {
@@ -13,10 +18,19 @@ class UserIndexController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+
+
+        $userSearching = UserIndex::searchFilter($request->get('searchName') )
+        ->orderBy('id','desc')
+        ->paginate(4);
+
+
+
         return Inertia::render("User/Index",[
-            'users' => UserIndex::orderBy('id','desc')->get(),
+            'users' =>$userSearching,
+            'search_Name'=>$request->searchName
         ]);
     }
 
@@ -27,7 +41,9 @@ class UserIndexController extends Controller
      */
     public function create()
     {
-        return Inertia::render("User/Create");
+        return Inertia::render("User/Create",[
+            'data_user'=>new UserIndex //this is user method
+        ]);
     }
 
     /**
@@ -36,12 +52,11 @@ class UserIndexController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UserstoreRequest $request)
     {
 
-
-        $creatData =$this->data($request);
-        UserIndex::create($creatData);
+         $user =$this->data($request);
+        UserIndex::create($user);
 
         return redirect()->route('user#index')
                         ->with('user_create','User data is successfully created!');
@@ -82,14 +97,19 @@ class UserIndexController extends Controller
      * @param  \App\Models\UserIndex  $userIndex
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, UserIndex $userIndex,$id)
+    public function update(UserupdateRequest $request, UserIndex $userIndex,$id)
     {
 
-      if($request->password){
-        $data=$request->all();
+
+
+
+
+        if($request->password){
+        $data=$this->data($request);
         $userIndex->where("id",$id)
                   ->update($data);
-      }
+        }
+
 
        return redirect()->route('user#index')
                         ->with("user_update",'User data have been Update!');
@@ -112,16 +132,12 @@ class UserIndexController extends Controller
 
     private function data($request){
 
-        $request->validate([
-            'name'=>['required'|"min:5"|"max:100"],
-            'email' =>['required'|"email"],
-            'password'=>['required'|"min:6"|"max:20"]
-        ]);
+
 
         $dataUser= [
             'name' =>$request->name,
             'email' =>$request->email,
-            'password' =>$request->password
+            'password' =>bcrypt($request->password)
         ];
 
         return $dataUser;
